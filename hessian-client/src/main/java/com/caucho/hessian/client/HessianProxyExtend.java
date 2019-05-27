@@ -62,7 +62,7 @@ public class HessianProxyExtend extends HessianProxy {
         HessianConnection conn = null;
         try {
             conn = this.sendRequest(mangleName, args);
-            //通过HessianURLConnection中的URLConnection 获取流
+            //通过HessianURLConnection中的URLConnection 获取输入流
             is = this.getInputStream(conn);
             setInputStreamWithLogLevel(is);
             int code = is.read();
@@ -109,41 +109,29 @@ public class HessianProxyExtend extends HessianProxy {
 
     }
 
-    private void setInputStreamWithLogLevel(InputStream is) {
-        if (log.isLoggable(Level.FINEST)) {
-            PrintWriter dbg = new PrintWriter(new HessianProxy.LogWriter(log));
-            HessianDebugInputStream dIs = new HessianDebugInputStream(is, dbg);
-            dIs.startTop2();
-            is = dIs;
-        }
-    }
 
-    private void setOutputStreamWithLogLevel(OutputStream os) {
-        if (log.isLoggable(Level.FINEST)) {
-            PrintWriter dbg = new PrintWriter(new HessianProxy.LogWriter(log));
-            HessianDebugOutputStream dOs = new HessianDebugOutputStream((OutputStream) os, dbg);
-            dOs.startTop2();
-            os = dOs;
-        }
-    }
 
     @Override
     protected HessianConnection sendRequest(String methodName, Object[] args) throws IOException {
-        HessianConnection conn = null;
-        conn = this._factory.getConnectionFactory().open(this._url);
+        //建立与远程hessian的连接
+        //此处为每次hessian的请求入口 应记录在档
+        HessianConnection conn  = this._factory.getConnectionFactory().open(this._url);
+        this.addRequestHeaders(conn);//添加请求头信息
         boolean isValid = false;
+        OutputStream os;
         try {
-            this.addRequestHeaders(conn);
-            OutputStream os;
             try {
-                os = conn.getOutputStream();
-            } catch (Exception var11) {
-                throw new HessianRuntimeException(var11);
+                os = conn.getOutputStream();//此处若URL有误 异常提示连接失败 Connection refused: connect
+            } catch (Exception e) {
+                throw new HessianRuntimeException(e);
             }
-            setOutputStreamWithLogLevel(os);
+            setOutputStreamWithLogLevel(os);//没啥用
+
+            //将请求参数 放入输出流
             AbstractHessianOutput out = this._factory.getHessianOutput(os);
             out.call(methodName, args);
             out.flush();
+            //发送HTTP请求
             conn.sendRequest();
             isValid = true;
             return conn;
@@ -189,5 +177,23 @@ public class HessianProxyExtend extends HessianProxy {
             return ResultUtil.data("HessianProxy[" + this._url + "]");
         }
         return ResultUtil.fail("");
+    }
+
+    private void setInputStreamWithLogLevel(InputStream is) {
+        if (log.isLoggable(Level.FINEST)) {
+            PrintWriter dbg = new PrintWriter(new HessianProxy.LogWriter(log));
+            HessianDebugInputStream dIs = new HessianDebugInputStream(is, dbg);
+            dIs.startTop2();
+            is = dIs;
+        }
+    }
+
+    private void setOutputStreamWithLogLevel(OutputStream os) {
+        if (log.isLoggable(Level.FINEST)) {
+            PrintWriter dbg = new PrintWriter(new HessianProxy.LogWriter(log));
+            HessianDebugOutputStream dOs = new HessianDebugOutputStream(os, dbg);
+            dOs.startTop2();
+            os = dOs;
+        }
     }
 }
