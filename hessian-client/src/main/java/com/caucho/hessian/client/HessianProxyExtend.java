@@ -1,6 +1,7 @@
 package com.caucho.hessian.client;
 
 import com.caucho.hessian.io.*;
+import com.caucho.hessian.manage.RequestManage;
 import com.caucho.hessian.util.ResultUtil;
 
 import java.io.IOException;
@@ -25,6 +26,7 @@ public class HessianProxyExtend extends HessianProxy {
 
     private URL _url;
     private WeakHashMap<Method, String> mangleMap = new WeakHashMap<>();
+    private RequestManage requestManage ;
 
     protected HessianProxyExtend(URL url, HessianProxyFactory factory) {
         super(url, factory);
@@ -33,6 +35,7 @@ public class HessianProxyExtend extends HessianProxy {
     protected HessianProxyExtend(URL url, HessianProxyFactory factory, Class<?> type) {
         super(url, factory, type);
         this._url = url;
+        this.requestManage = new RequestManage(url, factory, type);
     }
 
     @Override
@@ -70,7 +73,7 @@ public class HessianProxyExtend extends HessianProxy {
                 int read = is.read();
                 read = is.read();
                 AbstractHessianInput in = this._factory.getHessian2Input(is);
-                return in.readReply(method.getReturnType());
+                return in.readReply(method.getReturnType());//当服务出现异常时，读取的时候消费者才会抛异常
             } else if (code == 114) {
                 is.read();
                 is.read();
@@ -113,14 +116,16 @@ public class HessianProxyExtend extends HessianProxy {
 
     @Override
     protected HessianConnection sendRequest(String methodName, Object[] args) throws IOException {
-        //建立与远程hessian的连接
-        //此处为每次hessian的请求入口 应记录在档
+        //建立连接 这里需要设置超时时间
         HessianConnection conn  = this._factory.getConnectionFactory().open(this._url);
         this.addRequestHeaders(conn);//添加请求头信息
         boolean isValid = false;
         OutputStream os;
         try {
             try {
+                //此处内部源码通过HttpClient建立连接
+                //hessian连接入口
+                requestManage.doManageHessianRequest(methodName,args);
                 os = conn.getOutputStream();//此处若URL有误 异常提示连接失败 Connection refused: connect
             } catch (Exception e) {
                 throw new HessianRuntimeException(e);
@@ -133,6 +138,8 @@ public class HessianProxyExtend extends HessianProxy {
             out.flush();
             //发送HTTP请求
             conn.sendRequest();
+            //hessian远程调用完成
+
             isValid = true;
             return conn;
         } finally {

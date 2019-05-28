@@ -7,10 +7,12 @@
     <!-- 客户端Hessian代理工厂Bean -->
     <bean id="demoService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
         <!-- 请求代理Servlet路径 -->
-        <property name="serviceUrl" value="http://localhost:8081/service/demo"/>
+        <property name="serviceUrl" value="http://localhost:8080/service/demo"/>
         <!-- 接口定义 -->
         <property name="serviceInterface" value="demo.DemoService"/>
-        <property name="proxyFactory" ref="hessianProxyFactoryExtend"></property>
+        <property name="proxyFactory" ref="hessianProxyFactoryExtend"/>
+        <property name="readTimeout" value="1000"/>
+        <property name="connectTimeout" value="1000"/>
     </bean>
 
 

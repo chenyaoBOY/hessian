@@ -1,20 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd ">
 
-
-        <!-- 接口的具体实现类 -->
-        <bean id="demoService" class="demo.impl.DemoServiceImpl" />
-        <!-- 使用Spring的HessianServie做代理 -->
-        <bean name="/demo"
-              class="org.springframework.remoting.caucho.HessianServiceExporter">
-            <!-- service引用具体的实现实体Bean-->
-            <property name="service" ref="demoService" />
-            <property name="serviceInterface" value="demo.DemoService"/>
-        </bean>
-
-
+    <context:component-scan base-package="demo.impl" />
+    <context:property-placeholder ignore-unresolvable="true" location="classpath:config.properties"/>
+    <!-- 接口的具体实现类 -->
+    <!-- 使用Spring的HessianServie做代理 -->
+    <bean name="/demo"
+          class="org.springframework.remoting.caucho.HessianServiceExporter">
+        <!-- service引用具体的实现实体Bean-->
+        <property name="service" ref="demoServiceImpl"/>
+        <property name="serviceInterface" value="demo.DemoService"/>
+    </bean>
 
 
 </beans>

@@ -10,8 +10,7 @@ public class DemoClient {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
 
         DemoService service = (DemoService) context.getBean("demoService");
-
-        String hello = service.sayHello("say hello");
+        String hello = service.sayHello("param参数");
 
         System.out.println(hello);
 
