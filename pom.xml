@@ -12,6 +12,7 @@
         <module>hessian-server</module>
         <module>hessian-api</module>
         <module>hessian-client</module>
+        <module>hessian-manage</module>
     </modules>
 
 

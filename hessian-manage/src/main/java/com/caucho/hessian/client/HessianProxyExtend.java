@@ -1,8 +1,8 @@
 package com.caucho.hessian.client;
 
-import com.caucho.hessian.io.*;
 import com.caucho.hessian.manage.RequestManage;
 import com.caucho.hessian.util.ResultUtil;
+import com.caucho.hessian.io.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,10 +23,10 @@ import java.util.logging.Logger;
 public class HessianProxyExtend extends HessianProxy {
     private static final Logger log = Logger.getLogger(HessianProxyExtend.class.getName());
 
-
     private URL _url;
     private WeakHashMap<Method, String> mangleMap = new WeakHashMap<>();
     private RequestManage requestManage ;
+    private String applicationName;
 
     protected HessianProxyExtend(URL url, HessianProxyFactory factory) {
         super(url, factory);
@@ -125,8 +125,9 @@ public class HessianProxyExtend extends HessianProxy {
             try {
                 //此处内部源码通过HttpClient建立连接
                 //hessian连接入口
-                requestManage.doManageHessianRequest(methodName,args);
                 os = conn.getOutputStream();//此处若URL有误 异常提示连接失败 Connection refused: connect
+                //此处没有异常 表明远程hessianURL地址可以访问
+                requestManage.doManageHessianRequest(methodName,args,applicationName);
             } catch (Exception e) {
                 throw new HessianRuntimeException(e);
             }
@@ -203,5 +204,9 @@ public class HessianProxyExtend extends HessianProxy {
             dOs.startTop2();
             os = dOs;
         }
+    }
+
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
     }
 }
