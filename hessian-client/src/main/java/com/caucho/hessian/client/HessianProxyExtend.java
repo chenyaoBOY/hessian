@@ -192,6 +192,7 @@ public class HessianProxyExtend extends HessianProxy {
             HessianDebugInputStream dIs = new HessianDebugInputStream(is, dbg);
             dIs.startTop2();
             is = dIs;
+
         }
     }
 
