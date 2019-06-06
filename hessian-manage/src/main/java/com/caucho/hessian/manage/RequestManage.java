@@ -12,22 +12,20 @@ import java.util.concurrent.*;
  */
 public class RequestManage {
 
+    private ConcurrentHashMap<String, Class<?>> url2Class;
 
     private ZkManage zkManage = new ZkManage();
     private static final ThreadPoolExecutor executors = new ThreadPoolExecutor(4, 8,
             0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
-    public RequestManage(URL url, HessianProxyFactory factory, Class<?> type) {
-        zkManage.setUrl(url);
-        zkManage.setFactory(factory);
-        zkManage.setType(type);
+    public void doManageHessianRequest(String methodName, Object[] args, URL url, Class<?> type) {
+        url2Class.put(url.toString(),type);
+        executors.execute(() -> {
+            zkManage.createInterfaceNodeAndAdd(methodName,args,url,type);
+        });
     }
 
-    public void doManageHessianRequest(String methodName, Object[] args, String applicationName) {
-        zkManage.setApplicationName(applicationName);
-        executors.execute(() -> {
-            zkManage.createMasterNode();
-            zkManage.createInterfaceNodeAndAdd();
-        });
+    public ConcurrentHashMap<String, Class<?>> getUrl2Class() {
+        return url2Class;
     }
 }

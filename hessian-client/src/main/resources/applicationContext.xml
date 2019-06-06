@@ -3,16 +3,12 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="hessianProxyFactoryExtend" class="com.caucho.hessian.client.HessianProxyFactoryExtend">
-        <constructor-arg value="hessian-client"></constructor-arg>
-    </bean>
     <!-- 客户端Hessian代理工厂Bean -->
-    <bean id="demoService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
+    <bean id="demoService" class="com.caucho.hessian.client.HessianProxyFactoryBeanExtend">
         <!-- 请求代理Servlet路径 -->
         <property name="serviceUrl" value="http://localhost:8080/service/demo"/>
         <!-- 接口定义 -->
         <property name="serviceInterface" value="demo.DemoService"/>
-        <property name="proxyFactory" ref="hessianProxyFactoryExtend"/>
         <property name="readTimeout" value="1000"/>
         <property name="connectTimeout" value="1000"/>
     </bean>

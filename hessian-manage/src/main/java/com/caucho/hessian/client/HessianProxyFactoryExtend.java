@@ -1,35 +1,42 @@
 package com.caucho.hessian.client;
 
 import com.caucho.hessian.io.HessianRemoteObject;
-import com.caucho.hessian.util.AddressUtil;
+import com.caucho.hessian.manage.RequestManage;
+import com.caucho.hessian.manage.ZkManage;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.net.URL;
 
 /**
  * @author chenyao
  * @date 2019/5/27 15:48
- * @description
+ * @description 单例
  */
 public class HessianProxyFactoryExtend extends HessianProxyFactory {
 
+    private RequestManage requestManage = new RequestManage() ;
 
-    private final String applicationName;
-
-    public HessianProxyFactoryExtend(String applicationName) {
+    public HessianProxyFactoryExtend() {
         super();
-        this.applicationName = applicationName;
     }
 
+    /**
+     * @description //TODO HessianProxyFactory.create(class,url)
+     * @author chenyao
+     * @date  2019/6/6 15:54
+     * @return java.lang.Object
+     */
     @Override
     public Object create(Class<?> api, URL url, ClassLoader loader) {
         if (api == null) {
             throw new NullPointerException("api must not be null for HessianProxyFactory.create()");
         } else {
             HessianProxyExtend handler = new HessianProxyExtend(url, this, api);
-            handler.setApplicationName(applicationName);
             return Proxy.newProxyInstance(loader, new Class[]{api, HessianRemoteObject.class}, handler);
         }
+    }
+
+    public RequestManage getRequestManage() {
+        return requestManage;
     }
 }

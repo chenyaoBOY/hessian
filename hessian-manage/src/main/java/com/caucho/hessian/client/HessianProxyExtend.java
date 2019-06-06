@@ -1,6 +1,7 @@
 package com.caucho.hessian.client;
 
 import com.caucho.hessian.manage.RequestManage;
+import com.caucho.hessian.manage.ZkManage;
 import com.caucho.hessian.util.ResultUtil;
 import com.caucho.hessian.io.*;
 
@@ -12,30 +13,31 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * @author chenyao
  * @date 2019/5/27 15:47
- * @description
+ * @description 多例 xml中配置的接口列表都会创建一次
  */
 public class HessianProxyExtend extends HessianProxy {
     private static final Logger log = Logger.getLogger(HessianProxyExtend.class.getName());
 
-    private URL _url;
     private WeakHashMap<Method, String> mangleMap = new WeakHashMap<>();
-    private RequestManage requestManage ;
-    private String applicationName;
+    private URL url;
+    private RequestManage requestManage;
+    private Class<?> type;
 
     protected HessianProxyExtend(URL url, HessianProxyFactory factory) {
         super(url, factory);
     }
 
-    protected HessianProxyExtend(URL url, HessianProxyFactory factory, Class<?> type) {
+    protected HessianProxyExtend(URL url, HessianProxyFactoryExtend factory, Class<?> type) {
         super(url, factory, type);
-        this._url = url;
-        this.requestManage = new RequestManage(url, factory, type);
+        this.url = url;
+        this.requestManage = factory.getRequestManage();
     }
 
     @Override
@@ -113,11 +115,10 @@ public class HessianProxyExtend extends HessianProxy {
     }
 
 
-
     @Override
     protected HessianConnection sendRequest(String methodName, Object[] args) throws IOException {
         //建立连接 这里需要设置超时时间
-        HessianConnection conn  = this._factory.getConnectionFactory().open(this._url);
+        HessianConnection conn = this._factory.getConnectionFactory().open(this.url);
         this.addRequestHeaders(conn);//添加请求头信息
         boolean isValid = false;
         OutputStream os;
@@ -127,7 +128,7 @@ public class HessianProxyExtend extends HessianProxy {
                 //hessian连接入口
                 os = conn.getOutputStream();//此处若URL有误 异常提示连接失败 Connection refused: connect
                 //此处没有异常 表明远程hessianURL地址可以访问
-                requestManage.doManageHessianRequest(methodName,args,applicationName);
+                requestManage.doManageHessianRequest(methodName, args,url,type);
             } catch (Exception e) {
                 throw new HessianRuntimeException(e);
             }
@@ -164,13 +165,13 @@ public class HessianProxyExtend extends HessianProxy {
                 }
 
                 HessianProxy handler = (HessianProxy) proxyHandler;
-                return ResultUtil.data(new Boolean(this._url.equals(handler.getURL())));
+                return ResultUtil.data(new Boolean(this.url.equals(handler.getURL())));
             }
             return ResultUtil.data(Boolean.FALSE);
         }
 
         if (methodName.equals("hashCode") && params.length == 0) {
-            return ResultUtil.data(new Integer(this._url.hashCode()));
+            return ResultUtil.data(new Integer(this.url.hashCode()));
         }
 
         if (methodName.equals("getHessianType")) {
@@ -178,11 +179,11 @@ public class HessianProxyExtend extends HessianProxy {
         }
 
         if (methodName.equals("getHessianURL")) {
-            return ResultUtil.data(this._url.toString());
+            return ResultUtil.data(this.url.toString());
         }
 
         if (methodName.equals("toString") && params.length == 0) {
-            return ResultUtil.data("HessianProxy[" + this._url + "]");
+            return ResultUtil.data("HessianProxy[" + this.url + "]");
         }
         return ResultUtil.fail("");
     }
@@ -206,7 +207,4 @@ public class HessianProxyExtend extends HessianProxy {
         }
     }
 
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
-    }
 }

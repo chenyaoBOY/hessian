@@ -2,6 +2,7 @@ package com.caucho.hessian.util;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @author chenyao
@@ -13,6 +14,7 @@ public class NodeData implements Serializable {
     private long count;
     private String application;
     private Date date;
+    private Map<String,Integer> methodMap;
 
     public NodeData() {
     }
@@ -21,9 +23,10 @@ public class NodeData implements Serializable {
         this.count = count;
     }
 
-    public NodeData(long count, Date date) {
+    public NodeData(long count, Date date, String application) {
         this.count = count;
         this.date = date;
+        this.application = application;
     }
 
     public Date getDate() {
@@ -50,12 +53,21 @@ public class NodeData implements Serializable {
         this.application = application;
     }
 
+    public Map<String, Integer> getMethodMap() {
+        return methodMap;
+    }
+
+    public void setMethodMap(Map<String, Integer> methodMap) {
+        this.methodMap = methodMap;
+    }
+
     @Override
     public String toString() {
         return "NodeData{" +
                 "count=" + count +
                 ", application='" + application + '\'' +
                 ", date=" + date +
+                ", methodMap=" + methodMap +
                 '}';
     }
 }
