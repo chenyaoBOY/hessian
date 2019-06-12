@@ -37,6 +37,7 @@ public class HessianProxyExtend extends HessianProxy {
     protected HessianProxyExtend(URL url, HessianProxyFactoryExtend factory, Class<?> type) {
         super(url, factory, type);
         this.url = url;
+        this.type = type;
         this.requestManage = factory.getRequestManage();
     }
 

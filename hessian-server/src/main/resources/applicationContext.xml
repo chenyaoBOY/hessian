@@ -6,7 +6,6 @@
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd ">
 
     <context:component-scan base-package="demo.impl" />
-    <context:property-placeholder ignore-unresolvable="true" location="classpath:config.properties"/>
     <!-- 接口的具体实现类 -->
     <!-- 使用Spring的HessianServie做代理 -->
     <bean name="/demo"
@@ -14,6 +13,12 @@
         <!-- service引用具体的实现实体Bean-->
         <property name="service" ref="demoServiceImpl"/>
         <property name="serviceInterface" value="demo.DemoService"/>
+    </bean>
+    <bean name="/orderService"
+          class="org.springframework.remoting.caucho.HessianServiceExporter">
+        <!-- service引用具体的实现实体Bean-->
+        <property name="service" ref="orderServiceImpl"/>
+        <property name="serviceInterface" value="demo.OrderService"/>
     </bean>
 
 

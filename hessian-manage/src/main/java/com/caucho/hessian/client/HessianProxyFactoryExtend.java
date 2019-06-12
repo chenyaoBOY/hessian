@@ -10,11 +10,11 @@ import java.net.URL;
 /**
  * @author chenyao
  * @date 2019/5/27 15:48
- * @description 单例
+ * @description 多例
  */
 public class HessianProxyFactoryExtend extends HessianProxyFactory {
 
-    private RequestManage requestManage = new RequestManage() ;
+    private static RequestManage requestManage = new RequestManage() ;
 
     public HessianProxyFactoryExtend() {
         super();

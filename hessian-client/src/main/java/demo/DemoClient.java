@@ -11,9 +11,12 @@ public class DemoClient {
 
         DemoService service = (DemoService) context.getBean("demoService");
         String hello = service.sayHello("param参数");
-
+        OrderService orderService = context.getBean(OrderService.class);
+        orderService.getMsg("订单发送ongoing");
         System.out.println(hello);
+        while (true){
 
+        }
 
     }
 }

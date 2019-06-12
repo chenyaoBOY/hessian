@@ -7,7 +7,7 @@ import java.net.MalformedURLException;
 /**
  * @author chenyao
  * @date 2019/6/6 15:32
- * @description  单例
+ * @description  多例
  */
 public class HessianProxyFactoryBeanExtend extends HessianProxyFactoryBean {
 
