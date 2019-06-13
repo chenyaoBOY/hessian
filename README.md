@@ -1,4 +1,18 @@
 # hessian可视化管理项目v1.0(一期功能)
+
+## 技术栈
+### hessian-client hessian客户端
+### hessian-server hessian服务端
+### hessian-api hessian接口信息
+### hessian-manage
+* 重写HessianProxyFactoryBean
+* 重写HessianProxy
+* zookeeper管理hessian接口信息
+### hessian-ui 
+* springboot
+* vue
+* element-ui
+* zookeeper获取hessian信息
 ## 1.项目管理
 * 项目列表
 * 项目集群列表
